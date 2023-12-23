@@ -2,7 +2,15 @@
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        "fira-sans": ["Fira Sans", "sans-serif"],
+      },
+      colors: {
+        "primary": "#f01b16",
+        "primary-hover": "#fe0103",
+      },
+    },
   },
   plugins: [],
 };
