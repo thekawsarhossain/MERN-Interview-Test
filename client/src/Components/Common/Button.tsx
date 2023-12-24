@@ -11,7 +11,7 @@ const buttonClassesMap = {
 
 
 
-interface ButtonProps
+interface IButtonProps
     extends React.DetailedHTMLProps<
         React.ButtonHTMLAttributes<HTMLButtonElement>,
         HTMLButtonElement
@@ -31,7 +31,7 @@ export default function Button({
     onClick,
     href,
     ...props
-}: ButtonProps) {
+}: IButtonProps) {
     const navigate = useNavigate();
     let onButtonClick = onClick;
     if (href) {

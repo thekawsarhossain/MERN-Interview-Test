@@ -1,8 +1,9 @@
+import DrawingBoard from "../Components/Drawing/DrawingBoard";
 
 const CreateDrawing = () => {
     return (
-        <div>
-            <h2>Create Drawing</h2>
+        <div className="mt-4">
+            <DrawingBoard />
         </div>
     );
 };
