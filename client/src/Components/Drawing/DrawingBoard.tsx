@@ -1,33 +1,56 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useRef, useEffect, useState } from 'react';
 import DrawingToolbar from './DrawingToolbar';
-import { drawArrow, drawBrush, drawCircle, drawDiamond, drawLine, drawPencil, drawRectangle, erase, renderDynamicText } from '../../utils/drawingUtils';
+import { drawArrow, drawCircle, drawDiamond, drawLine, drawPencil, drawRectangle, erase, renderDynamicText } from '../../utils/drawingUtils';
 import { IDrawParams } from '../../interfaces/Drawing';
+import { TDrawingMode } from '../../types/DrawingMode';
 
 const DrawingBoard: React.FC = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const staticCanvasRef = useRef<HTMLCanvasElement>(null);
     const contextRef = useRef<CanvasRenderingContext2D | null>(null);
+    const staticContextRef = useRef<CanvasRenderingContext2D | null>(null);
     const isDrawing = useRef<boolean>(false);
     const startPoint = useRef<{ x: number; y: number } | null>(null);
-    const [drawingMode, setDrawingMode] = useState<string | null>(null);
+    const [drawingMode, setDrawingMode] = useState<TDrawingMode>("rectangle");
     const [color, setColor] = useState<string>('#000000');
     const [text, setText] = useState<string>('');
 
     useEffect(() => {
         const canvas = canvasRef?.current;
-        if (!canvas) return;
+        const staticCanvas = staticCanvasRef?.current;
+        if (!canvas || !staticCanvas) return;
 
-        canvas.width = window.innerWidth * 0.8;
-        canvas.height = window.innerHeight * 0.7;
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        staticCanvas.width = window.innerWidth;
+        staticCanvas.height = window.innerHeight;
         const context = canvas.getContext('2d');
-        if (context) {
+        const staticContext = staticCanvas.getContext('2d');
+        if (context && staticContext) {
             context.scale(2, 2);
+            staticContext.scale(1, 1);
             context.lineCap = 'round';
-            context.strokeStyle = color;
+            staticContext.lineCap = 'round';
             context.lineWidth = 1;
+            staticContext.lineWidth = 1;
             contextRef.current = context;
+            staticContextRef.current = staticContext;
         }
-    }, [color]);
+    }, []);
+
+    useEffect(() => {
+        const canvas = canvasRef?.current;
+        const staticCanvas = staticCanvasRef?.current;
+        if (!canvas || !staticCanvas) return;
+
+        const context = canvas.getContext('2d');
+        const staticContext = staticCanvas.getContext('2d');
+        if (context && staticContext) {
+            context.strokeStyle = color;
+            staticContext.strokeStyle = color;
+        }
+    }, [color])
 
     const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
         const { offsetX, offsetY } = e.nativeEvent;
@@ -58,32 +81,33 @@ const DrawingBoard: React.FC = () => {
             case 'line': drawLine(params); break;
             case 'arrow': drawArrow(params); break;
             case 'pencil': drawPencil(params); break;
-            case 'brush': drawBrush(params); break;
             case 'text': renderDynamicText(params); break;
-            case 'eraser': erase(params); break;
+            case 'eraser': erase({ ...params, contextRef: staticContextRef }); break;
             default: break;
         }
     };
 
-
     const endDrawing = () => {
-        if (contextRef.current) contextRef.current.closePath();
+        if (contextRef.current && staticContextRef.current && canvasRef.current && staticCanvasRef.current) {
+            staticContextRef.current.drawImage(canvasRef.current, 0, 0);
+            contextRef.current.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+        }
         isDrawing.current = false;
         startPoint.current = null;
     };
 
     const clearCanvas = () => {
-        if (contextRef.current) {
+        if (contextRef.current && staticContextRef.current) {
             contextRef.current.clearRect(0, 0, (canvasRef as unknown as any)?.current?.width, (canvasRef as unknown as any)?.current?.height);
+            staticContextRef.current.clearRect(0, 0, (staticCanvasRef as unknown as any)?.current?.width, (staticCanvasRef as unknown as any)?.current?.height);
         }
     };
 
     return (
-        <div className="flex flex-col items-center">
-            <DrawingToolbar onModeChange={(mode: string) => setDrawingMode(mode)} onColorChange={(color: string) => setColor(color)} onReset={() => {
-                setDrawingMode(null);
-                clearCanvas()
-            }} />
+        <div className="flex flex-col items-center relative">
+            <div className='mt-4 sticky z-50'>
+                <DrawingToolbar onModeChange={(mode: TDrawingMode) => setDrawingMode(mode)} onColorChange={(color: string) => setColor(color)} onReset={() => clearCanvas()} />
+            </div>
             {drawingMode === 'text' && (
                 <input
                     type="text"
@@ -94,12 +118,16 @@ const DrawingBoard: React.FC = () => {
                 />
             )}
             <canvas
+                ref={staticCanvasRef}
+                className="w-full absolute h-screen"
+            />
+            <canvas
                 ref={canvasRef}
                 onMouseDown={startDrawing}
                 onMouseMove={draw}
                 onMouseUp={endDrawing}
                 onMouseOut={endDrawing}
-                className="border"
+                className={`w-full absolute h-screen z-10 ${drawingMode === "eraser" ? "cursor-eraser" : "cursor-crosshair"}`}
             />
         </div>
     );

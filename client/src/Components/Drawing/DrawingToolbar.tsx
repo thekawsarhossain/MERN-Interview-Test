@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { BsBrush } from 'react-icons/bs';
 import { GrPowerReset } from 'react-icons/gr';
 import { HiOutlineMinus } from 'react-icons/hi';
 import { PiEraser, PiRectangle, PiTextT } from 'react-icons/pi';
 import { GoCircle, GoDiamond, GoArrowRight, GoPencil } from 'react-icons/go';
+import { TDrawingMode } from '../../types/DrawingMode';
 
 interface IToolbarButtonProps {
     title: string;
@@ -25,13 +25,13 @@ const ToolbarButton: React.FC<IToolbarButtonProps> = ({ title, icon, onClick, is
 };
 
 interface IToolbarProps {
-    onModeChange: (mode: string) => void;
+    onModeChange: (mode: TDrawingMode) => void;
     onColorChange: (color: string) => void;
     onReset: () => void;
 }
 
 const DrawingToolbar: React.FC<IToolbarProps> = ({ onModeChange, onColorChange, onReset }) => {
-    const [selectedMode, setSelectedMode] = useState<string | null>(null);
+    const [selectedMode, setSelectedMode] = useState<TDrawingMode>("rectangle");
 
     const buttons = [
         { title: 'Rectangle', icon: <PiRectangle />, onClick: () => handleModeChange('rectangle') },
@@ -40,12 +40,11 @@ const DrawingToolbar: React.FC<IToolbarProps> = ({ onModeChange, onColorChange, 
         { title: 'Line', icon: <HiOutlineMinus />, onClick: () => handleModeChange('line') },
         { title: 'Arrow', icon: <GoArrowRight />, onClick: () => handleModeChange('arrow') },
         { title: 'Pencil', icon: <GoPencil />, onClick: () => handleModeChange('pencil') },
-        { title: 'Brush', icon: <BsBrush />, onClick: () => handleModeChange('brush') },
         { title: 'Text', icon: <PiTextT /> , onClick: () => handleModeChange('text') },
         { title: 'Eraser', icon: <PiEraser />, onClick: () => handleModeChange('eraser') },
     ];
 
-    const handleModeChange = (mode: string) => {
+    const handleModeChange = (mode: TDrawingMode) => {
         onModeChange(mode);
         setSelectedMode(mode);
     };

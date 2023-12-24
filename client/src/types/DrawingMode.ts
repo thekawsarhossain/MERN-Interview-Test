@@ -5,5 +5,5 @@ export type TDrawingMode =
   | 'line'
   | 'arrow'
   | 'pencil'
+  | 'text'
   | 'eraser'
-  | 'brush';

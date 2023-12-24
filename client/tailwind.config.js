@@ -7,8 +7,11 @@ export default {
         "fira-sans": ["Fira Sans", "sans-serif"],
       },
       colors: {
-        "primary": "#f01b16",
+        primary: "#f01b16",
         "primary-hover": "#fe0103",
+      },
+      cursor: {
+        eraser: 'url("./public/images/eraser-cursor.png"), auto',
       },
     },
   },

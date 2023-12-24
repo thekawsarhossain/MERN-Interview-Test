@@ -6,7 +6,6 @@ export const drawRectangle = ({ x, y, contextRef, startPoint }: IDrawParams) => 
     contextRef.current.clearRect(0, 0, contextRef.current.canvas.width, contextRef.current.canvas.height);
     contextRef.current.strokeRect(startX, startY, x - startX, y - startY);
 };
-  
 
 export const drawDiamond = ({ x, y, contextRef, startPoint }: IDrawParams) => {
     if (!startPoint.current || !contextRef.current) return;
@@ -78,19 +77,6 @@ export const drawPencil = ({ x, y, contextRef, startPoint }: IDrawParams) => {
     contextRef.current.stroke();
 };
 
-export const drawBrush = ({ x, y, contextRef, startPoint }: IDrawParams) => {
-    if (!startPoint.current || !contextRef.current) return;
-    const { x: startX, y: startY } = startPoint.current;
-
-    contextRef.current.beginPath();
-    contextRef.current.moveTo(startX, startY);
-    contextRef.current.lineTo(x, y);
-    contextRef.current.stroke();
-    contextRef.current.closePath();
-
-    startPoint.current = { x, y };
-};
-
 export const renderDynamicText = ({ x, y, text, color, contextRef }: IDrawParams) => {
     if (!contextRef.current) return;
     contextRef.current.clearRect(0, 0, contextRef.current.canvas.width, contextRef.current.canvas.height);
@@ -101,5 +87,6 @@ export const renderDynamicText = ({ x, y, text, color, contextRef }: IDrawParams
 
 export const erase = ({ x, y, contextRef }: IDrawParams) => {
     if (!contextRef.current) return;
-    contextRef.current.clearRect(x - 5, y - 5, 10, 10);
+    const scale = 2;
+    contextRef.current.clearRect((x - 5) * scale, (y - 5) * scale, 10 * scale, 10 * scale);
 };
