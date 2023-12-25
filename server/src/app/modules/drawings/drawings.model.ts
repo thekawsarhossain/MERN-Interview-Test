@@ -9,8 +9,8 @@ const coordinatesSchema = new mongoose.Schema<{ x: number, y: number }>({
 
 const propertiesSchema = new mongoose.Schema<IDrawingElementProperties>({
     coordinates: { type: [coordinatesSchema], required: true },
-    color: { type: String, required: true },
-    thickness: { type: Number, required: true },
+    color: { type: String, required: true, default: "#000000" },
+    thickness: { type: Number, required: true, default: 1 },
     content: { type: String, required: false },
     font: { type: String, required: false },
     size: { type: Number, required: false }
