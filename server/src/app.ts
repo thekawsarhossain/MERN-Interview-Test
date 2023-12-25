@@ -7,7 +7,7 @@ import { DrawingRoutes } from './app/modules/drawings/drawings.route';
 // Express App Initializations
 const app: Application = express();
 
-app.use(cors({ origin: ['http://localhost:5173'] }));
+app.use(cors());
 
 // Parser
 app.use(express.json());
