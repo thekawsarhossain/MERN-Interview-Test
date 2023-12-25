@@ -8,22 +8,22 @@ import { TDrawingMode } from '../../types/DrawingMode';
 interface IDrawingBoardProps {
     drawing?: IDrawing;
 }
-
 let newPath: Array<{ x: number, y: number }> = [];
 
 const DrawingBoard: React.FC<IDrawingBoardProps> = ({ drawing }) => {
     const [elements, setElements] = useState<IDrawingElements[]>(drawing?.elements || []);
     const [history, setHistory] = useState<IDrawingElements[][]>([elements]);
     const [historyIndex, setHistoryIndex] = useState<number>(0);
+
+    const isDrawing = useRef<boolean>(false);
+    const [text, setText] = useState<string>('');
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const [color, setColor] = useState<string>('#000000');
     const staticCanvasRef = useRef<HTMLCanvasElement>(null);
     const contextRef = useRef<CanvasRenderingContext2D | null>(null);
-    const staticContextRef = useRef<CanvasRenderingContext2D | null>(null);
-    const isDrawing = useRef<boolean>(false);
     const startPoint = useRef<{ x: number; y: number } | null>(null);
+    const staticContextRef = useRef<CanvasRenderingContext2D | null>(null);
     const [drawingMode, setDrawingMode] = useState<TDrawingMode>("rectangle");
-    const [color, setColor] = useState<string>('#000000');
-    const [text, setText] = useState<string>('');
 
     useEffect(() => {
         const canvas = canvasRef?.current;
@@ -72,26 +72,30 @@ const DrawingBoard: React.FC<IDrawingBoardProps> = ({ drawing }) => {
                     contextRef.current.lineWidth = thickness;
                 }
 
-                const params = { x: coordinates[1]?.x, y: coordinates[1]?.y, contextRef, startPoint: { current: coordinates[0] }, shouldClear: false }
+                coordinates.forEach(coordPair => {
+                    const params = { x: coordPair[1]?.x, y: coordPair[1]?.y, contextRef, startPoint: { current: coordPair[0] }, shouldClear: false }
 
-                switch (type) {
-                    case 'rectangle': drawRectangle(params); break;
-                    case 'diamond': drawDiamond(params); break;
-                    case 'circle': drawCircle(params); break;
-                    case 'line': drawLine(params); break;
-                    case 'arrow': drawArrow(params); break;
-                    case 'pencil': drawPencil(params); break;
-                    default: break;
-                }
+                    switch (type) {
+                        case 'rectangle': drawRectangle(params); break;
+                        case 'diamond': drawDiamond(params); break;
+                        case 'circle': drawCircle(params); break;
+                        case 'line': drawLine(params); break;
+                        case 'arrow': drawArrow(params); break;
+                        case 'pencil': drawPencil(params); break;
+                        default: break;
+                    }
+                });
             });
         } else clearContexts();
     }, [elements]);
 
+    useEffect(() => {
+        console.log("Elements", elements)
+    }, [elements])
+
     const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
         const { offsetX, offsetY } = e.nativeEvent;
-        if (contextRef.current && drawingMode !== 'text') {
-            contextRef?.current?.beginPath();
-        }
+        if (contextRef.current && drawingMode !== 'text') contextRef?.current?.beginPath();
 
         startPoint.current = { x: offsetX / 2, y: offsetY / 2 };
         isDrawing.current = true;
@@ -101,15 +105,7 @@ const DrawingBoard: React.FC<IDrawingBoardProps> = ({ drawing }) => {
     const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
         if (!isDrawing.current || !contextRef.current) return;
         const { offsetX, offsetY } = e.nativeEvent;
-
-        const params: IDrawParams = {
-            x: offsetX / 2,
-            y: offsetY / 2,
-            contextRef,
-            startPoint,
-            text,
-            color,
-        };
+        const params: IDrawParams = { x: offsetX / 2, y: offsetY / 2, contextRef, startPoint, text, color };
 
         switch (drawingMode) {
             case 'rectangle': newPath = drawRectangle(params); break;
@@ -123,15 +119,20 @@ const DrawingBoard: React.FC<IDrawingBoardProps> = ({ drawing }) => {
         }
     };
 
-
     const endDrawing = () => {
         if (contextRef.current && staticContextRef.current && canvasRef.current && staticCanvasRef.current) {
             staticContextRef.current.drawImage(canvasRef.current, 0, 0);
             contextRef.current.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
             if (newPath.length) {
-                const newElements = [...elements, { type: drawingMode, properties: { coordinates: newPath, color, thickness: contextRef.current?.lineWidth } }];
-                setElements(newElements);
-                setHistory([...history.slice(0, historyIndex + 1), newElements]);
+                const existingElementIndex = elements.findIndex(element => element.type === drawingMode);
+                if (existingElementIndex !== -1) {
+                    elements[existingElementIndex].properties.coordinates.push(newPath);
+                    setElements([...elements]);
+                } else {
+                    const newElement = { type: drawingMode, properties: { coordinates: [newPath], color, thickness: contextRef.current?.lineWidth } };
+                    setElements([...elements, newElement]);
+                }
+                setHistory([...history.slice(0, historyIndex + 1), elements]);
                 setHistoryIndex(historyIndex + 1);
             }
         }
@@ -151,7 +152,8 @@ const DrawingBoard: React.FC<IDrawingBoardProps> = ({ drawing }) => {
         if (historyIndex > 0) {
             clearContexts();
             setHistoryIndex(historyIndex - 1);
-            setElements(history[historyIndex - 1]);
+            const previousElements = history[historyIndex - 1];
+            setElements(previousElements);
         }
     };
 
@@ -159,9 +161,11 @@ const DrawingBoard: React.FC<IDrawingBoardProps> = ({ drawing }) => {
         if (historyIndex < history.length - 1) {
             clearContexts();
             setHistoryIndex(historyIndex + 1);
-            setElements(history[historyIndex + 1]);
+            const nextElements = history[historyIndex + 1];
+            setElements(nextElements);
         }
     };
+
 
     return (
         <div className="flex flex-col items-center relative">
@@ -180,18 +184,8 @@ const DrawingBoard: React.FC<IDrawingBoardProps> = ({ drawing }) => {
                     className="mb-2 p-2 border"
                 />
             )}
-            <canvas
-                ref={staticCanvasRef}
-                className="w-full absolute h-screen"
-            />
-            <canvas
-                ref={canvasRef}
-                onMouseDown={startDrawing}
-                onMouseMove={draw}
-                onMouseUp={endDrawing}
-                onMouseOut={endDrawing}
-                className="w-full absolute h-screen z-10 cursor-crosshair"
-            />
+            <canvas ref={staticCanvasRef} className="w-full absolute h-screen" />
+            <canvas ref={canvasRef} onMouseDown={startDrawing} onMouseMove={draw} onMouseUp={endDrawing} onMouseOut={endDrawing} className="w-full absolute h-screen z-10 cursor-crosshair" />
         </div>
     );
 };

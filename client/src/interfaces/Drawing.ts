@@ -23,7 +23,7 @@ export interface IDrawParams {
 }
 
 interface IDrawingElementProperties {
-    coordinates: Array<{ x: number, y: number }>;
+    coordinates: Array<Array<{ x: number, y: number }>>;
     color: string;
     thickness: number;
     content?: string;

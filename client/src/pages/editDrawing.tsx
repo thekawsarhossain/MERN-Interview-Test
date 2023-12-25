@@ -10,14 +10,16 @@ const EditDrawing = () => {
                         "type": "rectangle",
                         "properties": {
                             "coordinates": [
-                                {
-                                    "x": 225.5,
-                                    "y": 90.5
-                                },
-                                {
-                                    "x": 307,
-                                    "y": 184
-                                }
+                                [
+                                    {
+                                        "x": 242,
+                                        "y": 80
+                                    },
+                                    {
+                                        "x": 333,
+                                        "y": 180
+                                    }
+                                ]
                             ],
                             "color": "#000000",
                             "thickness": 1
@@ -27,16 +29,18 @@ const EditDrawing = () => {
                         "type": "diamond",
                         "properties": {
                             "coordinates": [
-                                {
-                                    "x": 328.5,
-                                    "y": 90.5
-                                },
-                                {
-                                    "x": 379,
-                                    "y": 181.5
-                                }
+                                [
+                                    {
+                                        "x": 350,
+                                        "y": 85.5
+                                    },
+                                    {
+                                        "x": 423,
+                                        "y": 176
+                                    }
+                                ]
                             ],
-                            "color": "#000000",
+                            "color": "#c22424",
                             "thickness": 1
                         }
                     },
@@ -44,16 +48,28 @@ const EditDrawing = () => {
                         "type": "circle",
                         "properties": {
                             "coordinates": [
-                                {
-                                    "x": 404,
-                                    "y": 91.5
-                                },
-                                {
-                                    "x": 423,
-                                    "y": 109
-                                }
+                                [
+                                    {
+                                        "x": 540,
+                                        "y": 117.5
+                                    },
+                                    {
+                                        "x": 540,
+                                        "y": 117.5
+                                    }
+                                ],
+                                [
+                                    {
+                                        "x": 432.5,
+                                        "y": 92.5
+                                    },
+                                    {
+                                        "x": 450,
+                                        "y": 97.5
+                                    }
+                                ]
                             ],
-                            "color": "#000000",
+                            "color": "#430a0a",
                             "thickness": 1
                         }
                     },
@@ -61,118 +77,38 @@ const EditDrawing = () => {
                         "type": "line",
                         "properties": {
                             "coordinates": [
-                                {
-                                    "x": 461,
-                                    "y": 92
-                                },
-                                {
-                                    "x": 395.5,
-                                    "y": 176.5
-                                }
+                                [
+                                    {
+                                        "x": 476,
+                                        "y": 75
+                                    },
+                                    {
+                                        "x": 479,
+                                        "y": 173
+                                    }
+                                ],
+                                [
+                                    {
+                                        "x": 353,
+                                        "y": 189.5
+                                    },
+                                    {
+                                        "x": 476.5,
+                                        "y": 183
+                                    }
+                                ],
+                                [
+                                    {
+                                        "x": 455,
+                                        "y": 126.5
+                                    },
+                                    {
+                                        "x": 429,
+                                        "y": 174
+                                    }
+                                ]
                             ],
-                            "color": "#000000",
-                            "thickness": 1
-                        }
-                    },
-                    {
-                        "type": "arrow",
-                        "properties": {
-                            "coordinates": [
-                                {
-                                    "x": 483.5,
-                                    "y": 77
-                                },
-                                {
-                                    "x": 475,
-                                    "y": 183.5
-                                }
-                            ],
-                            "color": "#000000",
-                            "thickness": 1
-                        }
-                    },
-                    {
-                        "type": "pencil",
-                        "properties": {
-                            "coordinates": [
-                                {
-                                    "x": 0,
-                                    "y": 0
-                                },
-                                {
-                                    "x": 668.5,
-                                    "y": 177.5
-                                }
-                            ],
-                            "color": "#000000",
-                            "thickness": 1
-                        }
-                    },
-                    {
-                        "type": "pencil",
-                        "properties": {
-                            "coordinates": [
-                                {
-                                    "x": 0,
-                                    "y": 0
-                                },
-                                {
-                                    "x": 726.5,
-                                    "y": 98
-                                }
-                            ],
-                            "color": "#000000",
-                            "thickness": 1
-                        }
-                    },
-                    {
-                        "type": "eraser",
-                        "properties": {
-                            "coordinates": [
-                                {
-                                    "x": 0,
-                                    "y": 0
-                                },
-                                {
-                                    "x": 652,
-                                    "y": 112
-                                }
-                            ],
-                            "color": "#000000",
-                            "thickness": 1
-                        }
-                    },
-                    {
-                        "type": "pencil",
-                        "properties": {
-                            "coordinates": [
-                                {
-                                    "x": 0,
-                                    "y": 0
-                                },
-                                {
-                                    "x": 530,
-                                    "y": 164
-                                }
-                            ],
-                            "color": "#000000",
-                            "thickness": 1
-                        }
-                    },
-                    {
-                        "type": "pencil",
-                        "properties": {
-                            "coordinates": [
-                                {
-                                    "x": 0,
-                                    "y": 0
-                                },
-                                {
-                                    "x": 619.5,
-                                    "y": 177
-                                }
-                            ],
-                            "color": "#000000",
+                            "color": "#0f9ec2",
                             "thickness": 1
                         }
                     }
