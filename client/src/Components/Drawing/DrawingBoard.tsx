@@ -2,10 +2,17 @@
 import React, { useRef, useEffect, useState } from 'react';
 import DrawingToolbar from './DrawingToolbar';
 import { drawArrow, drawCircle, drawDiamond, drawLine, drawPencil, drawRectangle, erase, renderDynamicText } from '../../utils/drawingUtils';
-import { IDrawParams } from '../../interfaces/Drawing';
+import { IDrawParams, IDrawing, IDrawingElements } from '../../interfaces/Drawing';
 import { TDrawingMode } from '../../types/DrawingMode';
 
-const DrawingBoard: React.FC = () => {
+interface IDrawingBoardProps {
+    drawing?: IDrawing;
+}
+
+let newPath: Array<{ x: number, y: number }> = [];
+
+const DrawingBoard: React.FC<IDrawingBoardProps> = ({ drawing }) => {
+    const [elements, setElements] = useState<IDrawingElements[]>(drawing?.elements || []);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const staticCanvasRef = useRef<HTMLCanvasElement>(null);
     const contextRef = useRef<CanvasRenderingContext2D | null>(null);
@@ -50,15 +57,50 @@ const DrawingBoard: React.FC = () => {
             context.strokeStyle = color;
             staticContext.strokeStyle = color;
         }
-    }, [color])
+    }, [color]);
+
+    useEffect(() => {
+        if (!contextRef.current || !elements.length) return;
+        contextRef.current.clearRect(0, 0, contextRef.current.canvas.width, contextRef.current.canvas.height);
+
+        elements.forEach(element => {
+            const { type, properties } = element;
+            const { coordinates, color, thickness } = properties || {};
+
+            if (contextRef.current) {
+                contextRef.current.strokeStyle = color;
+                contextRef.current.lineWidth = thickness;
+            }
+
+            const params = { x: coordinates[1]?.x, y: coordinates[1]?.y, contextRef, startPoint: { current: coordinates[0] }, shouldClear: false }
+
+            switch (type) {
+                case 'rectangle': drawRectangle(params); break;
+                case 'diamond': drawDiamond(params); break;
+                case 'circle': drawCircle(params); break;
+                case 'line': drawLine(params); break;
+                case 'arrow': drawArrow(params); break;
+                case 'pencil': drawPencil(params); break;
+                case 'eraser': erase({ ...params, contextRef, staticContextRef }); break;
+                default: break;
+            }
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    useEffect(() => {
+        console.log(elements)
+    }, [elements])
 
     const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
         const { offsetX, offsetY } = e.nativeEvent;
         if (contextRef.current && drawingMode !== 'text') {
             contextRef?.current?.beginPath();
         }
+
         startPoint.current = { x: offsetX / 2, y: offsetY / 2 };
         isDrawing.current = true;
+        setElements([...elements as any]);
     };
 
     const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -75,25 +117,30 @@ const DrawingBoard: React.FC = () => {
         };
 
         switch (drawingMode) {
-            case 'rectangle': drawRectangle(params); break;
-            case 'diamond': drawDiamond(params); break;
-            case 'circle': drawCircle(params); break;
-            case 'line': drawLine(params); break;
-            case 'arrow': drawArrow(params); break;
-            case 'pencil': drawPencil(params); break;
+            case 'rectangle': newPath = drawRectangle(params); break;
+            case 'diamond': newPath = drawDiamond(params); break;
+            case 'circle': newPath = drawCircle(params); break;
+            case 'line': newPath = drawLine(params); break;
+            case 'arrow': newPath = drawArrow(params); break;
+            case 'pencil': newPath = drawPencil(params); break;
             case 'text': renderDynamicText(params); break;
-            case 'eraser': erase({ ...params, contextRef: staticContextRef }); break;
+            case 'eraser': newPath = erase({ ...params, contextRef, staticContextRef }); break;
             default: break;
         }
     };
+
 
     const endDrawing = () => {
         if (contextRef.current && staticContextRef.current && canvasRef.current && staticCanvasRef.current) {
             staticContextRef.current.drawImage(canvasRef.current, 0, 0);
             contextRef.current.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+            if (newPath.length) {
+                setElements([...elements, { type: drawingMode, properties: { coordinates: newPath, color, thickness: contextRef.current?.lineWidth } }]);
+            }
         }
         isDrawing.current = false;
         startPoint.current = null;
+        newPath = [];
     };
 
     const clearCanvas = () => {
@@ -101,6 +148,7 @@ const DrawingBoard: React.FC = () => {
             contextRef.current.clearRect(0, 0, (canvasRef as unknown as any)?.current?.width, (canvasRef as unknown as any)?.current?.height);
             staticContextRef.current.clearRect(0, 0, (staticCanvasRef as unknown as any)?.current?.width, (staticCanvasRef as unknown as any)?.current?.height);
         }
+        setElements([]);
     };
 
     return (
