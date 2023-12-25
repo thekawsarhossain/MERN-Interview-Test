@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { GrPowerReset } from 'react-icons/gr';
 import { HiOutlineMinus } from 'react-icons/hi';
-import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
 import { PiRectangle, PiTextT } from 'react-icons/pi';
 import { GoCircle, GoDiamond, GoArrowRight, GoPencil } from 'react-icons/go';
 import { TDrawingMode } from '../../types/DrawingMode';
@@ -28,12 +27,10 @@ const ToolbarButton: React.FC<IToolbarButtonProps> = ({ title, icon, onClick, is
 interface IToolbarProps {
     onModeChange: (mode: TDrawingMode) => void;
     onColorChange: (color: string) => void;
-    onBack: () => void;
-    onForward: () => void;
     onReset: () => void;
 }
 
-const DrawingToolbar: React.FC<IToolbarProps> = ({ onModeChange, onColorChange, onBack, onForward, onReset }) => {
+const DrawingToolbar: React.FC<IToolbarProps> = ({ onModeChange, onColorChange, onReset }) => {
     const [selectedMode, setSelectedMode] = useState<TDrawingMode>("rectangle");
 
     const buttons = [
@@ -57,9 +54,7 @@ const DrawingToolbar: React.FC<IToolbarProps> = ({ onModeChange, onColorChange, 
                 <ToolbarButton key={`toolbar_button_${button.title}__${index}`} {...button} isSelected={button.title.toLowerCase() === selectedMode} />
             ))}
             <input className='w-8 outline-none border-none bg-transparent cursor-pointer' type="color" onChange={(e) => onColorChange(e.target.value)} />
-            <ToolbarButton title="Undo" icon={<IoIosArrowBack />} onClick={onBack} isSelected={false} />
-            <ToolbarButton title="Redo" icon={<IoIosArrowForward />} onClick={onForward} isSelected={false} />
-            <ToolbarButton title="Reset" icon={<GrPowerReset />} onClick={onReset} isSelected={false} />
+            <ToolbarButton title="Undo" icon={<GrPowerReset />} onClick={onReset} isSelected={false} />
         </div>
     );
 };

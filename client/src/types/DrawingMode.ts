@@ -6,5 +6,3 @@ export type TDrawingMode =
   | 'arrow'
   | 'pencil'
   | 'text'
-  | 'undo'
-  | 'redo'

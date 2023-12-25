@@ -4,6 +4,8 @@ import DrawingToolbar from './DrawingToolbar';
 import { drawArrow, drawCircle, drawDiamond, drawLine, drawPencil, drawRectangle, renderDynamicText } from '../../utils/drawingUtils';
 import { IDrawParams, IDrawing, IDrawingElements } from '../../interfaces/Drawing';
 import { TDrawingMode } from '../../types/DrawingMode';
+import Button from '../Common/Button';
+import SaveDrawingModal from './DrawingModal';
 
 interface IDrawingBoardProps {
     drawing?: IDrawing;
@@ -12,8 +14,6 @@ let newPath: Array<{ x: number, y: number }> = [];
 
 const DrawingBoard: React.FC<IDrawingBoardProps> = ({ drawing }) => {
     const [elements, setElements] = useState<IDrawingElements[]>(drawing?.elements || []);
-    const [history, setHistory] = useState<IDrawingElements[][]>([elements]);
-    const [historyIndex, setHistoryIndex] = useState<number>(0);
 
     const isDrawing = useRef<boolean>(false);
     const [text, setText] = useState<string>('');
@@ -24,6 +24,7 @@ const DrawingBoard: React.FC<IDrawingBoardProps> = ({ drawing }) => {
     const startPoint = useRef<{ x: number; y: number } | null>(null);
     const staticContextRef = useRef<CanvasRenderingContext2D | null>(null);
     const [drawingMode, setDrawingMode] = useState<TDrawingMode>("rectangle");
+    const [openSaveModal, setOpen] = useState(false);
 
     useEffect(() => {
         const canvas = canvasRef?.current;
@@ -132,8 +133,6 @@ const DrawingBoard: React.FC<IDrawingBoardProps> = ({ drawing }) => {
                     const newElement = { type: drawingMode, properties: { coordinates: [newPath], color, thickness: contextRef.current?.lineWidth } };
                     setElements([...elements, newElement]);
                 }
-                setHistory([...history.slice(0, historyIndex + 1), elements]);
-                setHistoryIndex(historyIndex + 1);
             }
         }
         isDrawing.current = false;
@@ -148,32 +147,16 @@ const DrawingBoard: React.FC<IDrawingBoardProps> = ({ drawing }) => {
         }
     }
 
-    const undo = () => {
-        if (historyIndex > 0) {
-            clearContexts();
-            setHistoryIndex(historyIndex - 1);
-            const previousElements = history[historyIndex - 1];
-            setElements(previousElements);
-        }
-    };
-
-    const redo = () => {
-        if (historyIndex < history.length - 1) {
-            clearContexts();
-            setHistoryIndex(historyIndex + 1);
-            const nextElements = history[historyIndex + 1];
-            setElements(nextElements);
-        }
-    };
-
-
     return (
         <div className="flex flex-col items-center relative">
-            <div className='mt-4 sticky z-50'>
-                <DrawingToolbar onModeChange={(mode: TDrawingMode) => setDrawingMode(mode)} onColorChange={(color: string) => setColor(color)} onReset={() => {
-                    clearContexts()
-                    setElements([]);
-                }} onBack={undo} onForward={redo} />
+            <div className='mt-4 sticky z-50 flex items-start justify-between w-full'>
+                <div className='flex items-center justify-center w-full'>
+                    <DrawingToolbar onModeChange={(mode: TDrawingMode) => setDrawingMode(mode)} onColorChange={(color: string) => setColor(color)} onReset={() => {
+                        clearContexts()
+                        setElements([]);
+                    }} />
+                </div>
+                <Button disabled={!elements?.length} onClick={() => setOpen(true)} className='sticky z-50 min-w-max mr-4'>Save Changes</Button>
             </div>
             {drawingMode === 'text' && (
                 <input
@@ -186,6 +169,7 @@ const DrawingBoard: React.FC<IDrawingBoardProps> = ({ drawing }) => {
             )}
             <canvas ref={staticCanvasRef} className="w-full absolute h-screen" />
             <canvas ref={canvasRef} onMouseDown={startDrawing} onMouseMove={draw} onMouseUp={endDrawing} onMouseOut={endDrawing} className="w-full absolute h-screen z-10 cursor-crosshair" />
+            <SaveDrawingModal isOpen={openSaveModal} close={() => setOpen(false)} elements={elements} title={drawing?.title} description={drawing?.description} />
         </div>
     );
 };

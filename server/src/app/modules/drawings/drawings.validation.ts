@@ -18,13 +18,9 @@ const elementSchema = z.object({
 });
 
 export const drawingValidationSchema = z.object({
-    title: z.string({ required_error: "Title is required" }).min(10, { message: "Title must be at least 10 character long" }),
-    description: z.string({ required_error: "Description is required" }).min(10, { message: 'Description must be at least 10 character long' }),
     elements: z.array(elementSchema).nonempty({ message: 'Elements array cannot be empty' }),
 });
 
 export const drawingUpdateValidationSchema = z.object({
-    title: z.string().min(10, { message: 'Title must be at least 10 character long' }).optional(),
-    description: z.string().min(10, { message: 'Description must be at least 10 character long' }).optional(),
     elements: z.array(elementSchema).nonempty({ message: 'Elements array cannot be empty' }).optional(),
 });

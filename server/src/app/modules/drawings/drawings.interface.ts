@@ -13,8 +13,6 @@ export interface IDrawingElements {
 }
 
 export interface IDrawing {
-    title: string;
-    description: string;
     elements: IDrawingElements[];
     created_at: Date;
     updated_at: Date;

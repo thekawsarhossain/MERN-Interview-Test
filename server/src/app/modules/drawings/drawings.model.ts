@@ -22,8 +22,6 @@ const elementSchema = new mongoose.Schema<IDrawingElements>({
 }, { _id: false });
 
 const drawingSchema = new mongoose.Schema<IDrawing>({
-    title: { type: String, required: true, trim: true },
-    description: { type: String, required: true },
     elements: { type: [elementSchema], required: true },
     created_at: { type: Date, default: Date.now },
     updated_at: { type: Date, default: Date.now }

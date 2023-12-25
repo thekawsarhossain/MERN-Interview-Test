@@ -37,9 +37,10 @@ export interface IDrawingElements {
 }
 
 export interface IDrawing {
+    _id?: string;
     title: string;
     description: string;
     elements: IDrawingElements[];
-    created_at: Date;
-    updated_at: Date;
+    created_at?: Date;
+    updated_at?: Date;
 }
