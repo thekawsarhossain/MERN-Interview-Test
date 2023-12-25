@@ -8,7 +8,7 @@ const coordinatesSchema = new mongoose.Schema<{ x: number, y: number }>({
 
 
 const propertiesSchema = new mongoose.Schema<IDrawingElementProperties>({
-    coordinates: { type: [coordinatesSchema], required: true },
+    coordinates: { type: [[coordinatesSchema]], required: true },
     color: { type: String, required: true, default: "#000000" },
     thickness: { type: Number, required: true, default: 1 },
     content: { type: String, required: false },
@@ -22,6 +22,8 @@ const elementSchema = new mongoose.Schema<IDrawingElements>({
 }, { _id: false });
 
 const drawingSchema = new mongoose.Schema<IDrawing>({
+    title: { type: String, required: true, trim: true },
+    description: { type: String, required: true },
     elements: { type: [elementSchema], required: true },
     created_at: { type: Date, default: Date.now },
     updated_at: { type: Date, default: Date.now }
