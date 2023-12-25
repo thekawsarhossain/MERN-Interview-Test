@@ -92,11 +92,3 @@ export const renderDynamicText = ({ x, y, text, color, contextRef }: IDrawParams
     contextRef.current.font = '10px Arial';
     contextRef.current.fillText(text as string, x, y);
 };
-
-export const erase = ({ x, y, contextRef, staticContextRef }: IDrawParams): IPoint[] => {
-    if (!contextRef.current || !staticContextRef?.current) return [];
-    const scale = 2;
-    contextRef.current.clearRect((x - 5) * scale, (y - 5) * scale, 10 * scale, 10 * scale);
-    staticContextRef.current.clearRect((x - 5) * scale, (y - 5) * scale, 10 * scale, 10 * scale);
-    return [{ x: 0, y: 0 }, { x, y }]
-};
