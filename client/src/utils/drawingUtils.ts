@@ -85,10 +85,12 @@ export const drawPencil = ({ x, y, contextRef }: IDrawParams): IPoint[] => {
 };
 
 
-export const renderDynamicText = ({ x, y, text, color, contextRef }: IDrawParams) => {
-    if (!contextRef.current) return;
+export const renderDynamicText = ({ x, y, text, color, contextRef }: IDrawParams): IPoint[] => {
+    if (!contextRef.current) return [];
     contextRef.current.clearRect(0, 0, contextRef.current.canvas.width, contextRef.current.canvas.height);
     contextRef.current.fillStyle = color as string || "";
     contextRef.current.font = '10px Arial';
     contextRef.current.fillText(text as string, x, y);
+    
+    return [{ x: 0, y: 0 }, { x, y }];
 };

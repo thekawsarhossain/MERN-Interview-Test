@@ -6,13 +6,13 @@ const Home = () => {
             style={{
                 backgroundImage: "url('/images/red-circle.png')",
                 backgroundRepeat: "no-repeat",
-                backgroundSize: window.innerWidth > 768 ? "35%" : "50%",
+                backgroundSize: window.innerWidth >= 768 ? "35%" : "100%",
                 backgroundPosition: "center",
                 backgroundPositionX: "45%"
             }}>
 
-            <div className="flex flex-col space-y-8 mt-10">
-                <h2 className="text-6xl font-bold font-fira-sans leading-10">Unleash Your Creativity</h2>
+            <div className="flex flex-col space-y-4 md:space-y-8 mt-10 px-4 md:px-0">
+                <h2 className="text-4xl md:text-6xl font-bold font-fira-sans leading-10">Unleash Your Creativity</h2>
                 <p className="text-xl font-fira-sans leading-7">Embrace your imagination with our digital whiteboard. Draw, <br /> share, and explore in a community of creativity.</p>
                 <div className="flex items-center justify-start space-x-4">
                     <Button href="/draw/create">Start Drawing</Button>

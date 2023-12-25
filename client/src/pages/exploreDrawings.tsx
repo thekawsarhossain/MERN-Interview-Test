@@ -43,9 +43,9 @@ const ExploreDrawings = () => {
 
     return (
         <div className="container mx-auto mt-4">
-            <div className="flex justify-between items-center">
-                <h2 className="text-4xl font-bold font-fira-sans my-10">Explore list of drawings!</h2>
-                <Button href="/draw/create">Start Drawing</Button>
+            <div className="flex justify-between items-center px-4 md:px-0">
+                <h2 className="text-2xl md:text-4xl font-bold font-fira-sans my-10">Explore list of drawings!</h2>
+                <Button className="min-w-fit" href="/draw/create">Start Drawing</Button>
             </div>
             {isLoading ? (
                 <Loading className="w-12 h-12 mt-10" />

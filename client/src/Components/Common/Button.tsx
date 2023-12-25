@@ -44,7 +44,7 @@ export default function Button({
 
     let loaderClass = "border-gray-100  border-t-gray-600";
     if (kind === "primary") {
-        loaderClass = "border-gray-100 border-t-indigo-600";
+        loaderClass = "border-gray-100 border-t-red-700";
     }
 
     return (

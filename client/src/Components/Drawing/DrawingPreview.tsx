@@ -29,7 +29,7 @@ const DrawingPreview: React.FC<IDrawingPreviewProps> = ({ drawing }) => {
         if (elements.length) {
             elements.forEach(element => {
                 const { type, properties } = element;
-                const { coordinates, color, thickness } = properties || {};
+                const { coordinates, color, thickness, content } = properties || {};
 
                 if (contextRef.current) {
                     contextRef.current.strokeStyle = color;
@@ -46,7 +46,7 @@ const DrawingPreview: React.FC<IDrawingPreviewProps> = ({ drawing }) => {
                         case 'line': drawLine(params); break;
                         case 'arrow': drawArrow(params); break;
                         case 'pencil': drawPencil(params); break;
-                        case 'text': renderDynamicText(params); break;
+                        case 'text': renderDynamicText({ ...params, text: content, color }); break;
                         default: break;
                     }
                 });

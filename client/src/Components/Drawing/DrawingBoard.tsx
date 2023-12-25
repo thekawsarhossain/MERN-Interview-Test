@@ -6,6 +6,8 @@ import { IDrawParams, IDrawing, IDrawingElements } from '../../interfaces/Drawin
 import { TDrawingMode } from '../../types/DrawingMode';
 import Button from '../Common/Button';
 import SaveDrawingModal from './DrawingModal';
+import Modal from '../Common/Modal';
+import { Dialog } from '@headlessui/react';
 
 interface IDrawingBoardProps {
     drawing?: IDrawing;
@@ -14,7 +16,6 @@ let newPath: Array<{ x: number, y: number }> = [];
 
 const DrawingBoard: React.FC<IDrawingBoardProps> = ({ drawing }) => {
     const [elements, setElements] = useState<IDrawingElements[]>(drawing?.elements || []);
-
     const isDrawing = useRef<boolean>(false);
     const [text, setText] = useState<string>('');
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -24,7 +25,7 @@ const DrawingBoard: React.FC<IDrawingBoardProps> = ({ drawing }) => {
     const startPoint = useRef<{ x: number; y: number } | null>(null);
     const staticContextRef = useRef<CanvasRenderingContext2D | null>(null);
     const [drawingMode, setDrawingMode] = useState<TDrawingMode>("rectangle");
-    const [openSaveModal, setOpen] = useState(false);
+    const [openModal, setOpen] = useState({ saveDrawing: false, text: false });
 
     useEffect(() => {
         const canvas = canvasRef?.current;
@@ -66,7 +67,7 @@ const DrawingBoard: React.FC<IDrawingBoardProps> = ({ drawing }) => {
         if (elements.length) {
             elements.forEach(element => {
                 const { type, properties } = element;
-                const { coordinates, color, thickness } = properties || {};
+                const { coordinates, color, thickness, content } = properties || {};
 
                 if (contextRef.current) {
                     contextRef.current.strokeStyle = color;
@@ -83,16 +84,13 @@ const DrawingBoard: React.FC<IDrawingBoardProps> = ({ drawing }) => {
                         case 'line': drawLine(params); break;
                         case 'arrow': drawArrow(params); break;
                         case 'pencil': drawPencil(params); break;
+                        case 'text': renderDynamicText({ ...params, text: content, color }); break;
                         default: break;
                     }
                 });
             });
-        } else clearContexts();
+        }
     }, [elements]);
-
-    useEffect(() => {
-        console.log("Elements", elements)
-    }, [elements])
 
     const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
         const { offsetX, offsetY } = e.nativeEvent;
@@ -100,7 +98,6 @@ const DrawingBoard: React.FC<IDrawingBoardProps> = ({ drawing }) => {
 
         startPoint.current = { x: offsetX / 2, y: offsetY / 2 };
         isDrawing.current = true;
-        setElements([...elements as any]);
     };
 
     const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -115,7 +112,7 @@ const DrawingBoard: React.FC<IDrawingBoardProps> = ({ drawing }) => {
             case 'line': newPath = drawLine(params); break;
             case 'arrow': newPath = drawArrow(params); break;
             case 'pencil': newPath = drawPencil(params); break;
-            case 'text': renderDynamicText(params); break;
+            case 'text': newPath = renderDynamicText(params); break;
             default: break;
         }
     };
@@ -127,10 +124,11 @@ const DrawingBoard: React.FC<IDrawingBoardProps> = ({ drawing }) => {
             if (newPath.length) {
                 const existingElementIndex = elements.findIndex(element => element.type === drawingMode);
                 if (existingElementIndex !== -1) {
-                    elements[existingElementIndex].properties.coordinates.push(newPath);
-                    setElements([...elements]);
+                    const newElements = [...elements];
+                    newElements[existingElementIndex].properties.coordinates.push(newPath);
+                    setElements([...newElements]);
                 } else {
-                    const newElement = { type: drawingMode, properties: { coordinates: [newPath], color, thickness: contextRef.current?.lineWidth } };
+                    const newElement = { type: drawingMode, properties: { coordinates: [newPath], color, thickness: contextRef.current?.lineWidth, content: text } };
                     setElements([...elements, newElement]);
                 }
             }
@@ -138,6 +136,7 @@ const DrawingBoard: React.FC<IDrawingBoardProps> = ({ drawing }) => {
         isDrawing.current = false;
         startPoint.current = null;
         newPath = [];
+        text && setText("");
     };
 
     const clearContexts = () => {
@@ -149,27 +148,38 @@ const DrawingBoard: React.FC<IDrawingBoardProps> = ({ drawing }) => {
 
     return (
         <div className="flex flex-col items-center relative">
-            <div className='mt-4 sticky z-50 flex items-start justify-between w-full'>
+            <div className='mt-4 sticky z-50 flex flex-col md:flex-row items-center md:items-start justify-between w-full'>
                 <div className='flex items-center justify-center w-full'>
-                    <DrawingToolbar onModeChange={(mode: TDrawingMode) => setDrawingMode(mode)} onColorChange={(color: string) => setColor(color)} onReset={() => {
+                    <DrawingToolbar onModeChange={(mode: TDrawingMode) => {
+                        setDrawingMode(mode);
+                        if (mode === "text") setOpen((prev) => ({ ...prev, text: true }))
+                    }} onColorChange={(color: string) => setColor(color)} onReset={() => {
                         clearContexts()
                         setElements([]);
                     }} />
                 </div>
-                <Button disabled={!elements?.length} onClick={() => setOpen(true)} className='sticky z-50 min-w-max mr-4'>Save Changes</Button>
+                <Button disabled={!elements?.length} onClick={() => setOpen((prev) => ({ ...prev, saveDrawing: true }))} className='sticky z-50 min-w-max mr-4'>Save Changes</Button>
             </div>
             {drawingMode === 'text' && (
-                <input
-                    type="text"
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    placeholder="Enter text"
-                    className="mb-2 p-2 border"
-                />
+                <Modal isOpen={openModal.text} close={() => setOpen((prev) => ({ ...prev, text: false }))}>
+                    <Dialog.Title
+                        as="h3"
+                        className="text-lg font-medium leading-8 text-gray-900"
+                    >
+                        Write you text in input box and click on canvas to add text
+                    </Dialog.Title>
+                    <input
+                        type="text"
+                        value={text}
+                        onChange={(e) => setText(e.target.value)}
+                        placeholder="Enter text"
+                        className="shadow-sm block px-3 py-2 border rounded-md placeholder-gray-400 sm:text-sm focus:outline-none focus:border-indigo-600 w-full mt-4"
+                    />
+                </Modal>
             )}
             <canvas ref={staticCanvasRef} className="w-full absolute h-screen" />
-            <canvas ref={canvasRef} onMouseDown={startDrawing} onMouseMove={draw} onMouseUp={endDrawing} onMouseOut={endDrawing} className="w-full absolute h-screen z-10 cursor-crosshair" />
-            <SaveDrawingModal isOpen={openSaveModal} close={() => setOpen(false)} elements={elements} title={drawing?.title} description={drawing?.description} />
+            <canvas ref={canvasRef} onMouseDown={startDrawing} onMouseMove={draw} onMouseUp={endDrawing} onMouseOut={endDrawing} className={`w-full absolute h-screen z-10 ${text ? "cursor-text" : "cursor-crosshair"}`} />
+            <SaveDrawingModal isOpen={openModal.saveDrawing} close={() => setOpen((prev) => ({ ...prev, saveDrawing: true }))} elements={elements} title={drawing?.title} description={drawing?.description} />
         </div>
     );
 };
